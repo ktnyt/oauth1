@@ -80,7 +80,8 @@ func (c *Config) RequestToken() (string, string, error) {
 		return "", "", err
 	}
 	params.Add("oauth_callback", c.CallbackURL)
-	signature, err := sign(c.ConsumerSecret, "", req, params)
+	signer := Signer{nonce(), time.Now()}
+	signature, err := signer.Sign(c.ConsumerSecret, "", req, params)
 	if err != nil {
 		return "", "", err
 	}
@@ -167,7 +168,8 @@ func (c *Config) AccessToken(requestToken, requestSecret, verifier string) (stri
 	}
 	params.Add("oauth_token", requestToken)
 	params.Add("oauth_verifier", verifier)
-	signature, err := sign(c.ConsumerSecret, "", req, params)
+	signer := Signer{nonce(), time.Now()}
+	signature, err := signer.Sign(c.ConsumerSecret, "", req, params)
 	if err != nil {
 		return "", "", err
 	}
@@ -223,6 +225,36 @@ func NewClient(ctx context.Context, consumerKey, consumerSecret, accessToken, ac
 	}
 }
 
+// Signer provdes dyanmic data requred to sign an OAuth1 signature.
+type Signer struct {
+	Nonce     string
+	Timestamp time.Time
+}
+
+// Base returns the signature base string
+func (s Signer) Base(req *http.Request, params url.Values) string {
+	params.Add("oauth_nonce", s.Nonce)
+	params.Add("oauth_timestamp", strconv.FormatInt(s.Timestamp.Unix(), 10))
+	baseURL, _ := url.Parse(req.URL.String())
+	baseURL.RawQuery = ""
+	upperMethod := strings.ToUpper(req.Method)
+	escapedURL := url.QueryEscape(baseURL.String())
+	escapedParams := url.QueryEscape(normalizeSpace(params.Encode()))
+	return strings.Join([]string{upperMethod, escapedURL, escapedParams}, "&")
+}
+
+// Sign creates a concatenated consumer and token secret key and calculates
+// the HMAC digest of the message. Returns the base64 encoded digest bytes.
+func (s Signer) Sign(consumerSecret, tokenSecret string, req *http.Request, params url.Values) (string, error) {
+	base := s.Base(req, params)
+	key := strings.Join([]string{consumerSecret, tokenSecret}, "&")
+	h := hmac.New(sha1.New, []byte(key))
+	if _, err := h.Write([]byte(base)); err != nil {
+		return "", err
+	}
+	return base64.StdEncoding.EncodeToString(h.Sum(nil)), nil
+}
+
 func nonce() string {
 	h := md5.New()
 	now := time.Now().Unix()
@@ -244,33 +276,27 @@ func prepareParams(r *http.Request, consumerKey string) (url.Values, error) {
 		}
 		r.Body = ioutil.NopCloser(bytes.NewReader(b))
 	}
+	for key, values := range r.URL.Query() {
+		for i := range values {
+			params.Add(key, url.QueryEscape(values[i]))
+		}
+	}
 	params.Add("oauth_consumer_key", consumerKey)
-	params.Add("oauth_nonce", nonce())
 	params.Add("oauth_signature_method", "HMAC-SHA1")
-	params.Add("oauth_timestamp", strconv.FormatInt(time.Now().Unix(), 10))
 	params.Add("oauth_version", "1.0")
 	return params, nil
 }
 
-func sign(consumerSecret, tokenSecret string, req *http.Request, params url.Values) (string, error) {
-	upperMethod := strings.ToUpper(req.Method)
-	escapedURL := url.QueryEscape(req.URL.String())
-	escapedParams := url.QueryEscape(params.Encode())
-	base := strings.Join([]string{upperMethod, escapedURL, escapedParams}, "&")
-	key := strings.Join([]string{consumerSecret, tokenSecret}, "&")
-	h := hmac.New(sha1.New, []byte(key))
-	if _, err := h.Write([]byte(base)); err != nil {
-		return "", err
-	}
-	return base64.StdEncoding.EncodeToString(h.Sum(nil)), nil
-}
-
 func formatOAuthHeader(params url.Values) string {
-	joined := params.Encode()
+	joined := normalizeSpace(params.Encode())
 	pairs := strings.Split(joined, "&")
 	for i := range pairs {
 		pair := strings.Split(pairs[i], "=")
 		pairs[i] = fmt.Sprintf("%s=\"%s\"", pair[0], pair[1])
 	}
 	return fmt.Sprintf("OAuth %s", strings.Join(pairs, ", "))
+}
+
+func normalizeSpace(s string) string {
+	return strings.Replace(s, "+", "%20", -1)
 }

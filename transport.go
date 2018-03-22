@@ -2,6 +2,7 @@ package oauth1
 
 import (
 	"net/http"
+	"time"
 )
 
 // Transport is an http.RoundTripper which makes OAuth1 HTTP requests. It
@@ -28,7 +29,8 @@ func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 		return nil, err
 	}
 	params.Add("oauth_token", t.accessToken)
-	signature, err := sign(t.accessSecret, "", req, params)
+	signer := Signer{nonce(), time.Now()}
+	signature, err := signer.Sign(t.accessSecret, "", req, params)
 	if err != nil {
 		return nil, err
 	}
