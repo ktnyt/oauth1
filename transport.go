@@ -30,7 +30,7 @@ func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 	}
 	params.Add("oauth_token", t.accessToken)
 	signer := Signer{nonce(), time.Now()}
-	signature, err := signer.Sign(t.accessSecret, "", req, params)
+	signature, err := signer.Sign(t.consumerSecret, t.accessSecret, req, params)
 	if err != nil {
 		return nil, err
 	}
