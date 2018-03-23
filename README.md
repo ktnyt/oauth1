@@ -1,3 +1,6 @@
+![CircleCI](https://circleci.com/gh/ktnyt/oauth1.svg?style=shield&circle-token=a718fab78379159949983c4c681066406c6aafc3)
+[![Go Report Card](https://goreportcard.com/badge/github.com/ktnyt/oauth1)](https://goreportcard.com/report/github.com/ktnyt/oauth1)
+
 # oauth1
 OAauth1 is a Go implementation of the [OAuth 1 spec](https://tools.ietf.org/html/rfc5849).
 
