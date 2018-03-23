@@ -225,7 +225,7 @@ func NewClient(ctx context.Context, consumerKey, consumerSecret, accessToken, ac
 	}
 }
 
-// Signer provdes dyanmic data requred to sign an OAuth1 signature.
+// Signer provdes dyanmic data required to sign an OAuth1 signature.
 type Signer struct {
 	Nonce     string
 	Timestamp time.Time
