@@ -20,7 +20,11 @@ func main() {
 		panic("Missing required environment variable")
 	}
 
-	config := oauth1.Config{ConsumerKey: consumerKey, ConsumerSecret: consumerSecret}
+	config := oauth1.Config{
+		Context:        oauth1.NoContext,
+		ConsumerKey:    consumerKey,
+		ConsumerSecret: consumerSecret,
+	}
 
 	// httpClient will automatically authorize http.Request's
 	httpClient := config.Client(oauth1.NoContext, accessToken, accessSecret)

@@ -23,6 +23,7 @@ func main() {
 	}
 
 	config = oauth1.Config{
+		Context:        oauth1.NoContext,
 		ConsumerKey:    consumerKey,
 		ConsumerSecret: consumerSecret,
 		CallbackURL:    outOfBand,

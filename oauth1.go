@@ -2,7 +2,6 @@ package oauth1
 
 import (
 	"bytes"
-	"context"
 	"crypto/hmac"
 	"crypto/md5"
 	"crypto/sha1"
@@ -19,6 +18,7 @@ import (
 	"time"
 
 	"github.com/ktnyt/oauth1/internal"
+	"golang.org/x/net/context"
 )
 
 // NoContext is the default context you should supply if not using
@@ -30,6 +30,9 @@ var NoContext = context.TODO()
 // Config describes a typical OAuth1 flow, given a Consumer Key,
 // Consumer Secret, and a Callback URL.
 type Config struct {
+	// Context
+	Context context.Context
+
 	// Consumer Key (Client Identifier)
 	ConsumerKey string
 
@@ -89,7 +92,7 @@ func (c *Config) RequestToken() (string, string, error) {
 	req.Header.Add("Authorization", formatOAuthHeader(params))
 
 	// Request a request_token pair
-	res, err := internal.ContextClient(nil).Do(req)
+	res, err := internal.ContextClient(c.Context).Do(req)
 	if err != nil {
 		return "", "", err
 	}
@@ -177,7 +180,7 @@ func (c *Config) AccessToken(requestToken, requestSecret, verifier string) (stri
 	req.Header.Add("Authorization", formatOAuthHeader(params))
 
 	// Request an access_token pair
-	res, err := internal.ContextClient(nil).Do(req)
+	res, err := internal.ContextClient(c.Context).Do(req)
 	if err != nil {
 		return "", "", err
 	}
