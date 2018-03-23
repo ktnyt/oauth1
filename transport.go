@@ -22,6 +22,8 @@ type Transport struct {
 	accessSecret   string
 }
 
+// RoundTrip authorizes the request with a signed OAuth1 Authorization header
+// using the credentials given.
 func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 	req2 := cloneRequest(req)
 	params, err := prepareParams(req, t.consumerKey)
