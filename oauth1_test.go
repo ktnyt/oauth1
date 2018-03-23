@@ -15,7 +15,11 @@ const expectedVerifier = "some_verifier"
 func TestNewClient(t *testing.T) {
 	expectedToken := "access_token"
 	expectedConsumerKey := "consumer_key"
-	config := Config{ConsumerKey: expectedConsumerKey, ConsumerSecret: "consumer_secret"}
+	config := Config{
+		Context:        NoContext,
+		ConsumerKey:    expectedConsumerKey,
+		ConsumerSecret: "consumer_secret",
+	}
 	client := config.Client(NoContext, expectedToken, "access_secret")
 
 	server := newMockServer(func(w http.ResponseWriter, req *http.Request) {
@@ -29,7 +33,11 @@ func TestNewClient(t *testing.T) {
 }
 
 func TestNewClient_DefaultTransport(t *testing.T) {
-	config := &Config{ConsumerKey: "t", ConsumerSecret: "s"}
+	config := &Config{
+		Context:        NoContext,
+		ConsumerKey:    "t",
+		ConsumerSecret: "s",
+	}
 	client := NewClient(NoContext, config.ConsumerKey, config.ConsumerSecret, "t", "s")
 	// assert that the client uses the DefaultTransport
 	transport, ok := client.Transport.(*Transport)
@@ -41,7 +49,11 @@ func TestNewClient_ContextClientTransport(t *testing.T) {
 	baseTransport := &http.Transport{}
 	baseClient := &http.Client{Transport: baseTransport}
 	ctx := context.WithValue(NoContext, HTTPClient, baseClient)
-	config := &Config{ConsumerKey: "t", ConsumerSecret: "s"}
+	config := &Config{
+		Context:        NoContext,
+		ConsumerKey:    "t",
+		ConsumerSecret: "s",
+	}
 	client := NewClient(ctx, config.ConsumerKey, config.ConsumerSecret, "t", "s")
 	// assert that the client uses the ctx client's Transport as its base RoundTripper
 	transport, ok := client.Transport.(*Transport)

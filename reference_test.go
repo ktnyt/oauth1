@@ -25,6 +25,7 @@ func TestTwitterRequestTokenAuthHeader(t *testing.T) {
 	expectedTimestamp := "1318467427"
 	expectedNonce := "ea9ec8429b68d6b77cd5600adbbb0456"
 	config := &Config{
+		Context:        NoContext,
 		ConsumerKey:    expectedConsumerKey,
 		ConsumerSecret: "L8qq9PZyRg6ieKGEKhZolGC0vJWLw8iEJ88DRdyOg",
 		CallbackURL:    "http://localhost/sign-in-with-twitter/",
@@ -69,6 +70,7 @@ func TestTwitterAccessTokenAuthHeader(t *testing.T) {
 	expectedTimestamp := "1318467427"
 	expectedNonce := "a9900fe68e2573b27a37f10fbad6a755"
 	config := &Config{
+		Context:        NoContext,
 		ConsumerKey:    expectedConsumerKey,
 		ConsumerSecret: "L8qq9PZyRg6ieKGEKhZolGC0vJWLw8iEJ88DRdyOg",
 		Endpoint: Endpoint{
@@ -111,6 +113,7 @@ var expectedTwitterConsumerKey = "xvz1evFS4wEEPTGEFPHBog"
 var expectedTwitterOAuthToken = "370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb"
 var expectedNonce = "kYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg"
 var twitterConfig = &Config{
+	Context:        NoContext,
 	ConsumerKey:    expectedTwitterConsumerKey,
 	ConsumerSecret: "kAcSOqF21Fu85e7zjz7ZN2U4ZRhfV3WpwPAoE3Z7kBw",
 	Endpoint: Endpoint{
